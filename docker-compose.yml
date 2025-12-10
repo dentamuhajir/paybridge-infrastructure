@@ -1,6 +1,7 @@
 version: "3.9"
 
 services:
+
   postgres:
     image: postgres:16
     container_name: paybridge-postgres
@@ -14,9 +15,50 @@ services:
     networks:
       - paybridge_network
 
-networks:
-  paybridge_network:
-    external: true
+  paybridge-loki:
+    image: grafana/loki:2.9.0
+    container_name: paybridge-loki
+    restart: unless-stopped
+    command: -config.file=/etc/loki/loki.yml
+    volumes:
+      - ./loki/loki.yml:/etc/loki/loki.yml:ro
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+    networks:
+      - paybridge_network
+
+  paybridge-promtail:
+    image: grafana/promtail:2.9.0
+    container_name: paybridge-promtail
+    restart: unless-stopped
+    command: -config.file=/etc/promtail/promtail.yml
+    volumes:
+      - ./promtail/promtail.yml:/etc/promtail/promtail.yml:ro
+      - paybridge_logs:/var/log/paybridge
+    networks:
+      - paybridge_network
+
+  paybridge-grafana:
+    image: grafana/grafana:10.2.0
+    container_name: paybridge-grafana
+    restart: unless-stopped
+    env_file:
+      - ./grafana/grafana.env
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - ./grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
+    networks:
+      - paybridge_network
 
 volumes:
   postgres_data:
+  loki_data:
+  paybridge_logs:
+
+networks:
+  paybridge_network:
+    external: true
