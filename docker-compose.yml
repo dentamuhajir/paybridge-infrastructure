@@ -16,7 +16,7 @@ services:
 
 networks:
   paybridge_network:
-    external: true # Dont forget to create a network manually by using this command <docker network create paybridge_network>
+    external: true
 
 volumes:
   postgres_data:
