@@ -15,49 +15,81 @@ services:
     networks:
       - paybridge_network
 
-  paybridge-loki:
-    image: grafana/loki:2.9.0
-    container_name: paybridge-loki
-    restart: unless-stopped
-    command: -config.file=/etc/loki/loki.yml
-    volumes:
-      - ./loki/loki.yml:/etc/loki/loki.yml:ro
-      - loki_data:/loki
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: paybridge-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
     ports:
-      - "3100:3100"
+      - "2181:2181"
     networks:
       - paybridge_network
 
-  paybridge-promtail:
-    image: grafana/promtail:2.9.0
-    container_name: paybridge-promtail
-    restart: unless-stopped
-    command: -config.file=/etc/promtail/promtail.yml
-    volumes:
-      - ./promtail/promtail.yml:/etc/promtail/promtail.yml:ro
-      - paybridge_logs:/var/log/paybridge
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: paybridge-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+
+      # Listener configuration
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://paybridge-kafka:9092
+
+      # Topic replication
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     networks:
       - paybridge_network
 
-  paybridge-grafana:
-    image: grafana/grafana:10.2.0
-    container_name: paybridge-grafana
-    restart: unless-stopped
-    env_file:
-      - ./grafana/grafana.env
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./grafana/datasources:/etc/grafana/provisioning/datasources
-      - ./grafana/dashboards:/var/lib/grafana/dashboards
-      - ./grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
-    networks:
-      - paybridge_network
+  # loki:
+  #   image: grafana/loki:2.9.0
+  #   container_name: paybridge-loki
+  #   restart: unless-stopped
+  #   command: -config.file=/etc/loki/loki.yml
+  #   volumes:
+  #     - ./loki/loki.yml:/etc/loki/loki.yml:ro
+  #     - loki_data:/loki
+  #   ports:
+  #     - "3100:3100"
+  #   networks:
+  #     - paybridge_network
+
+  # promtail:
+  #   image: grafana/promtail:2.9.0
+  #   container_name: paybridge-promtail
+  #   restart: unless-stopped
+  #   command: -config.file=/etc/promtail/promtail.yml
+  #   volumes:
+  #     - ./promtail/promtail.yml:/etc/promtail/promtail.yml:ro
+  #     - paybridge_logs:/var/log/paybridge
+  #   networks:
+  #     - paybridge_network
+
+  # grafana:
+  #   image: grafana/grafana:10.2.0
+  #   container_name: paybridge-grafana
+  #   restart: unless-stopped
+  #   env_file:
+  #     - ./grafana/grafana.env
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - ./grafana/datasources:/etc/grafana/provisioning/datasources
+  #     - ./grafana/dashboards:/var/lib/grafana/dashboards
+  #     - ./grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
+  #   networks:
+  #     - paybridge_network
 
 volumes:
   postgres_data:
-  loki_data:
-  paybridge_logs:
+  # loki_data:
+  # paybridge_logs:
+
 
 networks:
   paybridge_network:
