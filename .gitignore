@@ -1,3 +1,5 @@
 postgres.env
 redis.env
+zookeeper.env
+kafka.env
 note
