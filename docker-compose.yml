@@ -51,6 +51,14 @@ services:
       - "29092:29092"
     networks:
       - paybridge_network
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: paybridge-mailhog
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI
+    networks:
+      - paybridge_network
 
   # loki:
   #   image: grafana/loki:2.9.0
