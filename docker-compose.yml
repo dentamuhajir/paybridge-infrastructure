@@ -61,6 +61,23 @@ services:
     networks:
       - paybridge_network
 
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: paybridge-jenkins
+    user: root
+    restart: unless-stopped
+    env_file:
+      - ./jenkins/jenkins.env
+    ports:
+      - "${JENKINS_UI_PORT:-18080}:8080"
+      - "${JENKINS_AGENT_PORT:-50010}:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - paybridge_network
+
+
   # loki:
   #   image: grafana/loki:2.9.0
   #   container_name: paybridge-loki
@@ -103,6 +120,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  jenkins_home:
   # loki_data:
   # paybridge_logs:
 
