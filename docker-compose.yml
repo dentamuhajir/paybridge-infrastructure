@@ -77,6 +77,15 @@ services:
     networks:
       - paybridge_network
 
+  jaeger:
+    image: jaegertracing/all-in-one:1.55
+    container_name: paybridge-jaeger
+    restart: unless-stopped
+    ports:
+      - "16686:16686"   # Jaeger UI
+      - "4317:4317"     # OTLP gRPC
+    networks:
+      - paybridge_network
 
   # loki:
   #   image: grafana/loki:2.9.0
