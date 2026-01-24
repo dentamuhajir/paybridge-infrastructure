@@ -98,6 +98,16 @@ services:
     networks:
       - paybridge_network
 
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: paybridge-grafana
+    ports:
+      - "3002:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - paybridge_network
+
 
   # loki:
   #   image: grafana/loki:2.9.0
@@ -142,6 +152,7 @@ volumes:
   postgres_data:
   redis_data:
   jenkins_home:
+  grafana_data:
   # loki_data:
   # paybridge_logs:
 
