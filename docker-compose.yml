@@ -52,14 +52,14 @@ services:
     networks:
       - paybridge_network
       
-  mailhog:
-    image: mailhog/mailhog:v1.0.1
-    container_name: paybridge-mailhog
-    ports:
-      - "1025:1025"   # SMTP
-      - "8025:8025"   # Web UI
-    networks:
-      - paybridge_network
+  # mailhog:
+  #   image: mailhog/mailhog:v1.0.1
+  #   container_name: paybridge-mailhog
+  #   ports:
+  #     - "1025:1025"   # SMTP
+  #     - "8025:8025"   # Web UI
+  #   networks:
+  #     - paybridge_network
 
   # jenkins:
   #   image: jenkins/jenkins:lts
@@ -76,6 +76,18 @@ services:
   #     - /var/run/docker.sock:/var/run/docker.sock
   #   networks:
   #     - paybridge_network
+  
+  otel-collector:
+    image: otel/opentelemetry-collector:0.96.0
+    container_name: paybridge-otel-collector
+    restart: unless-stopped
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - "4317:4317"   # OTLP gRPC (services send here)
+    networks:
+      - paybridge_network
 
   jaeger:
     image: jaegertracing/all-in-one:1.55
@@ -83,8 +95,8 @@ services:
     restart: unless-stopped
     ports:
       - "16686:16686"   # Jaeger UI
-      - "4317:4317"     # OTLP gRPC
-      - "4318:4318"   # HTTP
+      # - "4317:4317"     # OTLP gRPC
+      # - "4318:4318"   # HTTP
     networks:
       - paybridge_network
 
