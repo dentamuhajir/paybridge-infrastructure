@@ -86,6 +86,7 @@ services:
       - ./otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
     ports:
       - "4317:4317"   # OTLP gRPC (services send here)
+      - "4318:4318"
     networks:
       - paybridge_network
 
